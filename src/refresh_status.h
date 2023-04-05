@@ -33,6 +33,8 @@ typedef struct {
   guint timeoutId;
   guint closeId;
   gboolean pulsed;
+  gint width;
+  gint height;
 } RefreshState;
 
 void handle_application_is_being_refreshed(gchar *appName, gchar *lockFilePath,
