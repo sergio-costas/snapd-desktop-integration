@@ -35,6 +35,7 @@ typedef struct {
   gboolean pulsed;
   gint width;
   gint height;
+  gboolean wait_change_in_lock_file;
 } RefreshState;
 
 void handle_application_is_being_refreshed(gchar *appName, gchar *lockFilePath,
