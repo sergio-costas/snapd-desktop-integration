@@ -16,6 +16,7 @@
  */
 
 #include "sdi-helpers.h"
+#include "io.snapcraft.PrivilegedDesktopLauncher.h"
 
 GAppInfo *sdi_get_desktop_file_from_snap(SnapdSnap *snap) {
   GPtrArray *apps = snapd_snap_get_apps(snap);
@@ -84,4 +85,15 @@ GTimeSpan sdi_get_remaining_time_in_seconds(SnapdSnap *snap) {
   g_autoptr(GDateTime) proceed_time = snapd_snap_get_proceed_time(snap);
   g_autoptr(GDateTime) now = g_date_time_new_now_local();
   return (g_date_time_difference(proceed_time, now) / 1000000);
+}
+
+void sdi_launch_desktop(GApplication *app, const gchar *desktop_file) {
+  g_autoptr(PrivilegedDesktopLauncher) launcher = NULL;
+
+  launcher = privileged_desktop_launcher__proxy_new_sync(
+      g_application_get_dbus_connection(app), G_DBUS_PROXY_FLAGS_NONE,
+      "io.snapcraft.Launcher", "/io/snapcraft/PrivilegedDesktopLauncher", NULL,
+      NULL);
+  privileged_desktop_launcher__call_open_desktop_entry_sync(
+      launcher, desktop_file, NULL, NULL);
 }
