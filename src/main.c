@@ -141,10 +141,15 @@ static void do_startup(GObject *object, gpointer data) {
   notify_init("snapd-desktop-integration_snapd-desktop-integration");
 #endif
   client = snapd_client_new();
-  refresh_monitor = sdi_refresh_monitor_new(G_APPLICATION(object));
-  if (!sdi_refresh_monitor_start(refresh_monitor, &error)) {
-    g_message("Failed to export the DBus Desktop Integration API %s",
-              error->message);
+  // switch to launch RAA, since it is still in beta
+  g_autofree gchar *raa_switch_path =
+      g_build_path("/", getenv("SNAP_USER_COMMON"), "raa-enabled", NULL);
+  if (g_file_test(raa_switch_path, G_FILE_TEST_EXISTS)) {
+    refresh_monitor = sdi_refresh_monitor_new(G_APPLICATION(object));
+    if (!sdi_refresh_monitor_start(refresh_monitor, &error)) {
+      g_message("Failed to export the DBus Desktop Integration API %s",
+                error->message);
+    }
   }
 }
 
