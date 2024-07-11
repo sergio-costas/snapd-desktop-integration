@@ -87,7 +87,20 @@ GTimeSpan sdi_get_remaining_time_in_seconds(SnapdSnap *snap) {
   return (g_date_time_difference(proceed_time, now) / 1000000);
 }
 
-void sdi_launch_desktop(GApplication *app, const gchar *desktop_file) {
+gboolean sdi_launch_desktop(GApplication *app, const gchar *desktop_file) {
+  g_autofree gchar *full_desktop_path = NULL;
+  g_autofree gchar *desktop_file2 = NULL;
+  if (*desktop_file == '/') {
+    full_desktop_path = g_strdup(desktop_file);
+    desktop_file2 = g_path_get_basename(desktop_file);
+  } else {
+    full_desktop_path = g_build_path("/", "/var/lib/snapd/desktop/applications",
+                                     desktop_file, NULL);
+    desktop_file2 = g_strdup(desktop_file);
+  }
+  if (!g_file_test(full_desktop_path, G_FILE_TEST_EXISTS)) {
+    return FALSE;
+  }
   g_autoptr(PrivilegedDesktopLauncher) launcher = NULL;
 
   launcher = privileged_desktop_launcher__proxy_new_sync(
@@ -95,5 +108,6 @@ void sdi_launch_desktop(GApplication *app, const gchar *desktop_file) {
       "io.snapcraft.Launcher", "/io/snapcraft/PrivilegedDesktopLauncher", NULL,
       NULL);
   privileged_desktop_launcher__call_open_desktop_entry_sync(
-      launcher, desktop_file, NULL, NULL);
+      launcher, desktop_file2, NULL, NULL);
+  return TRUE;
 }
