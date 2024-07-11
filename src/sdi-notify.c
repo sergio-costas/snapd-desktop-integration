@@ -125,6 +125,24 @@ static void app_ignore_snaps_notification(NotifyNotification *notification,
   g_object_unref(notification);
 }
 
+static void show_updates(SdiNotify *self) {
+  if (!sdi_launch_desktop(self->application, SNAP_STORE_UPDATES)) {
+    sdi_launch_desktop(self->application, SNAP_STORE);
+  }
+}
+
+static void sdi_notify_action_show_updates(GActionGroup *action_group,
+                                           GVariant *str_data,
+                                           SdiNotify *self) {
+  show_updates(self);
+}
+
+static void app_show_updates(NotifyNotification *notification, char *action,
+                             gpointer user_data) {
+  show_updates((SdiNotify *)user_data);
+  g_object_unref(notification);
+}
+
 static void show_pending_update_notification(SdiNotify *self,
                                              const gchar *title,
                                              const gchar *body, GIcon *icon,
@@ -138,14 +156,14 @@ static void show_pending_update_notification(SdiNotify *self,
     notify_notification_set_hint(notification, "image-path",
                                  g_variant_new_string(icon_name));
   }
-  notify_notification_add_action(notification, "app.close-notification",
-                                 _("Close"), app_close_notification, NULL,
-                                 NULL);
+  notify_notification_add_action(notification, "app.show-updates",
+                                 _("Show updates"), app_show_updates,
+                                 g_object_ref(self), g_object_unref);
   notify_notification_add_action(notification, "default", _("Close"),
                                  app_close_notification, NULL, NULL);
   g_autoptr(GVariant) snap_list = get_snap_list(snaps);
   notify_notification_add_action(
-      notification, "app.ignore-notification", _("Ignore"),
+      notification, "app.ignore-notification", _("Don't remind me again"),
       (NotifyActionCallback)app_ignore_snaps_notification,
       ignore_notify_data_new(self, snap_list),
       (GFreeFunc)ignore_notify_data_free);
@@ -164,6 +182,7 @@ static void show_simple_notification(SdiNotify *self, const gchar *title,
     notify_notification_set_hint(notification, "image-path",
                                  g_variant_new_string(icon_name));
   }
+
   notify_notification_add_action(notification, "default", _("Close"),
                                  app_close_notification, NULL, NULL);
   notify_notification_show(notification, NULL);
@@ -347,14 +366,6 @@ void sdi_notify_refresh_complete(SdiNotify *self, SnapdSnap *snap,
 GApplication *sdi_notify_get_application(SdiNotify *self) {
   g_return_val_if_fail(SDI_IS_NOTIFY(self), NULL);
   return self->application;
-}
-
-static void sdi_notify_action_show_updates(GActionGroup *action_group,
-                                           GVariant *str_data,
-                                           SdiNotify *self) {
-  if (!sdi_launch_desktop(self->application, SNAP_STORE_UPDATES)) {
-    sdi_launch_desktop(self->application, SNAP_STORE);
-  }
 }
 
 static void set_actions(SdiNotify *self) {
