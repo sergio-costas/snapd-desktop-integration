@@ -21,8 +21,6 @@
 #define SNAP_STORE "snap-store_snap-store.desktop"
 #define SNAP_STORE_UPDATES "snap-store_show-updates.desktop"
 
-#define SNAP_STORE "snap-store_snap-store.desktop"
-
 #include <gio/gdesktopappinfo.h>
 #include <glib/gi18n.h>
 #include <libnotify/notify.h>
