@@ -79,3 +79,9 @@ GPtrArray *sdi_get_desktop_filenames_for_snap(const gchar *snap_name) {
   }
   return desktop_files;
 }
+
+GTimeSpan sdi_get_remaining_time_in_seconds(SnapdSnap *snap) {
+  g_autoptr(GDateTime) proceed_time = snapd_snap_get_proceed_time(snap);
+  g_autoptr(GDateTime) now = g_date_time_new_now_local();
+  return (g_date_time_difference(proceed_time, now) / 1000000);
+}
