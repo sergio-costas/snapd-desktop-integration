@@ -80,16 +80,6 @@ static GVariant *get_snap_list(GSList *snaps) {
   return g_variant_ref_sink(g_variant_builder_end(builder));
 }
 
-static void sdi_notify_action_ignore(GActionGroup *action_group,
-                                     GVariant *app_list, SdiNotify *self) {
-  gsize len;
-  g_autofree gchar **apps = (gchar **)g_variant_get_strv(app_list, &len);
-
-  g_return_if_fail(apps != NULL);
-  for (gsize i = 0; i < len; i++)
-    g_signal_emit_by_name(self, "ignore-snap-event", apps[i]);
-}
-
 // Currently, due to the way Snapd creates the .desktop files, the notifications
 // created with GNotify don't show the application icon in the upper-left
 // corner, putting instead the "generic gears" icon. This is the reason why, by
